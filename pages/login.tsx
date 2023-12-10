@@ -8,8 +8,9 @@ export default function Login() {
       </div>
 
       <div className="col-span-1 md:col-span-2 lg:col-span-3 bg-blue-400 p-5 md:p-20 rounded-l-full">
-        <div className="flex justify-center items-center h-full">
+        <div className="flex flex-col justify-center items-center h-full">
           <img className="w-1/2" src="/image1.png" alt="" />
+          
         </div>
       </div>
     </div>

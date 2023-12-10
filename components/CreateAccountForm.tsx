@@ -1,20 +1,32 @@
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { log } from "console";
 import { useRouter } from "next/router";
 import { useState } from "react";
 
 import { SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
 
-export default function LoginForm() {
+export default function CreateAccountForm() {
   const [isPass, setIsPass] = useState(false);
   const router = useRouter();
 
-  const createLoginFormSchema = z.object({
-    email: z.string().email("E-mail é obrigatório"),
-    password: z.string().min(6, "A senha deve conter no mínimo 6 caracteres."),
-  });
+  const createLoginFormSchema = z
+    .object({
+      email: z.string().email("E-mail é obrigatório"),
+      password: z
+        .string()
+        .min(6, "A senha deve conter no mínimo 6 caracteres."),
+      confirmPass: z
+        .string()
+        .min(6, "A senha deve conter no mínimo 6 caracteres."),
+    })
+    .superRefine(({ password, confirmPass }, ctx) => {
+      if (password !== confirmPass) {
+        ctx.addIssue({ message: "Senhas divergetes", code: "custom", path: ['confirmPass'] });
+      }
+    });
 
   type createLogin = z.infer<typeof createLoginFormSchema>;
 
@@ -28,7 +40,7 @@ export default function LoginForm() {
   return (
     <div className="w-full h-screen text-center flex justify-center items-center p-10 md:p-20">
       <form className="w-full text-start" onSubmit={handleSubmit(onSubmit)}>
-        <h1 className={`text-6xl mb-10 font-bold`}>Bem vindo</h1>
+        <h1 className={`text-6xl mb-10 font-bold`}>Criar conta</h1>
 
         <div className="flex flex-col relative">
           <label htmlFor="email" className="text-start font-semibold">
@@ -47,7 +59,7 @@ export default function LoginForm() {
 
         <div className="flex flex-col relative mt-5">
           <label htmlFor="email" className="text-start font-semibold">
-            Password{" "}
+            Senha{" "}
           </label>
           <input
             {...register("password")}
@@ -69,9 +81,20 @@ export default function LoginForm() {
           <span className="text-red-400">{errors.password.message}</span>
         )}
 
-        <div className="flex justify-end mt-3 ">
-          <span className="cursor-pointer">Esqueceu a senha?</span>
+        <div className="flex flex-col relative mt-5">
+          <label htmlFor="email" className="text-start font-semibold">
+            Confirmar Senha{" "}
+          </label>
+          <input
+            {...register("confirmPass")}
+            type={!isPass ? "password" : "text"}
+            className="p-3 rounded-lg w-full border focus:outline-blue-200 focus:border-none mt-2"
+          />
         </div>
+
+        {errors.confirmPass?.message && (
+          <span className="text-red-400">{errors.confirmPass.message}</span>
+        )}
 
         <button className="w-full bg-blue-400 p-3 hover:bg-blue-500 hover:shadow-blue-200 hover:shadow-lg rounded-lg text-white font-semibold mt-10 mb-5">
           ENTRAR
@@ -79,14 +102,14 @@ export default function LoginForm() {
 
         <div className="flex justify-center">
           <span>
-            Não possui uma conta?{" "}
+            Possui uma conta?{" "}
             <b
               className="text-blue-500 font-semibold hover:text-blue-600 mx-2 cursor-pointer"
               onClick={() => {
-                router.push("/create-account");
+                router.push("/login");
               }}
             >
-              Criar conta
+              Entrar
             </b>
           </span>
         </div>
