@@ -1,30 +1,55 @@
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
+
+import { SubmitHandler, useForm } from "react-hook-form";
+import { z } from "zod";
 
 export default function LoginForm() {
   const [isPass, setIsPass] = useState(false);
 
+  const createLoginFormSchema = z.object({
+    email: z.string().email("E-mail é obrigatório"),
+    password: z.string().min(6, "A senha deve conter no mínimo 6 caracteres."),
+  });
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm<createLogin>({ resolver: zodResolver(createLoginFormSchema) });
+  const onSubmit: SubmitHandler<createLogin> = (data) => console.log(data);
+
+  type createLogin = z.infer<typeof createLoginFormSchema>;
+
   return (
     <div className="w-full h-screen text-center flex justify-center items-center p-10 md:p-20">
-      <form className="w-full">
+      <form className="w-full text-start" onSubmit={handleSubmit(onSubmit)}>
         <h1 className={`text-6xl mb-10 font-bold`}>Bem vindo</h1>
 
-        <div className="flex flex-col">
+        <div className="flex flex-col relative">
           <label htmlFor="email" className="text-start font-semibold">
             E-mail
           </label>
           <input
+            {...register("email")}
             type="text"
-            className="p-3 rounded-lg w-full border focus:outline-blue-200 focus:border-none mt-2 mb-3"
+            className="p-3 rounded-lg w-full border focus:outline-blue-200 focus:border-none mt-2"
           />
         </div>
 
-        <div className="flex flex-col relative">
+        {errors.email?.message && (
+          <span className="text-red-400">{errors.email.message}</span>
+        )}
+
+        <div className="flex flex-col relative mt-5">
           <label htmlFor="email" className="text-start font-semibold">
             Password{" "}
           </label>
           <input
+            {...register("password")}
             type={!isPass ? "password" : "text"}
             className="p-3 rounded-lg w-full border focus:outline-blue-200 focus:border-none mt-2"
           />
@@ -32,12 +57,16 @@ export default function LoginForm() {
             onClick={() => {
               setIsPass(!isPass);
             }}
-            className="absolute right-3 bottom-3 flex items-center  px-2 py-1 rounded-lg bg-blue-50 hover:bg-blue-400 hover:text-white text-blue-500"
+            className="absolute right-3 bottom-3 flex items-center  px-2 py-1 rounded-lg bg-blue-50 hover:bg-blue-400 hover:text-white text-blue-300"
             type="button"
           >
-            <FontAwesomeIcon icon={faEye} />
+            <FontAwesomeIcon icon={isPass ? faEye : faEyeSlash} />
           </button>
         </div>
+
+        {errors.password?.message && (
+          <span className="text-red-400">{errors.password.message}</span>
+        )}
 
         <div className="flex justify-end mt-3 ">
           <span className="cursor-pointer">Esqueceu a senha?</span>
@@ -47,12 +76,14 @@ export default function LoginForm() {
           ENTRAR
         </button>
 
-        <span>
-          Não possui uma conta?{" "}
-          <b className="text-blue-500 font-semibold hover:text-blue-600 mx-2 cursor-pointer">
-            Criar conta
-          </b>
-        </span>
+        <div className="flex justify-center">
+          <span>
+            Não possui uma conta?{" "}
+            <b className="text-blue-500 font-semibold hover:text-blue-600 mx-2 cursor-pointer">
+              Criar conta
+            </b>
+          </span>
+        </div>
       </form>
     </div>
   );
